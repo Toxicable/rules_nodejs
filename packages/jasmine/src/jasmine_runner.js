@@ -1,4 +1,5 @@
 const fs = require('fs');
+const istanbul = require('istanbul-api');
 
 let jasmineCore = null
 let JasmineRunner = require('jasmine/lib/jasmine');
@@ -59,13 +60,52 @@ function main(args) {
   // so we need to add it back
   jrunner.configureDefaultReporter({});
 
-  jrunner.onComplete((passed) => {
+  const config = istanbul.config.loadObject({
+    instrumentation: {
+      root: '.',
+      excludes: ['**/*.[testspec].[tj]s'],
+      'include-all-sources': true,
+    },
+    reporting: {
+      // right now we just report a summary to the stdout
+      // but in the future we could output to json for bazel coverage to pick up the report
+      reports: ['text-summary'],      
+      dir: '/tmp/hgi',
+
+    },
+  });
+
+  var exitFn, unhookFn;
+  istanbul.cover.getCoverFunctions(config, function(err, data) {
+    if (err) {
+      console.error(err);
+    }
+
+    if (data) {
+      coverageFn = data.coverageFn;
+      unhookFn = data.unhookFn;
+      exitFn = data.exitFn;
+
+      data.hookFn();
+
+      jrunner.execute();
+    }
+  });
+
+  jrunner.onComplete(passed => {
     let exitCode = passed ? 0 : BAZEL_EXIT_TESTS_FAILED;
     if (noSpecsFound) exitCode = BAZEL_EXIT_NO_TESTS_FOUND;
+
+    if (exitFn) {
+      exitFn();
+    }
+    if (unhookFn) {
+      unhookFn();
+    }
+
     process.exit(exitCode);
   });
 
-  jrunner.execute();
   return 0;
 }
 

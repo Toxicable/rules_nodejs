@@ -29,6 +29,7 @@ def jasmine_node_test(
         expected_exit_code = 0,
         tags = [],
         jasmine = "@npm//jasmine",
+        istanbul_api = "@npm//istanbul-api",
         **kwargs):
     """Runs tests in NodeJS using the Jasmine test runner.
 
@@ -51,7 +52,7 @@ def jasmine_node_test(
         tags = tags,
     )
 
-    all_data = data + srcs + deps + [jasmine]
+    all_data = data + srcs + deps + [jasmine, istanbul_api]
     all_data += [Label("//:src/jasmine_runner.js")]
     all_data += [":%s_devmode_srcs.MF" % name]
     all_data += [Label("@bazel_tools//tools/bash/runfiles")]
