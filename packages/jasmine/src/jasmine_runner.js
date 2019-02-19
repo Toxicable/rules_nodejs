@@ -60,23 +60,26 @@ function main(args) {
   // so we need to add it back
   jrunner.configureDefaultReporter({});
 
-  const config = istanbul.config.loadObject({
+  const istanbulConfig = istanbul.config.loadObject({
     instrumentation: {
       root: '.',
-      excludes: ['**/*.[testspec].[tj]s'],
+      // try to exclude bazels external files
+      // we know exactly what files need to be included
+      // why cant we have an inclusion list instead
+      excludes: ['**/*.spec.[tj]s', '**/*.test.[tj]s', 'external/**/*'],
       'include-all-sources': true,
     },
     reporting: {
       // right now we just report a summary to the stdout
       // but in the future we could output to json for bazel coverage to pick up the report
-      reports: ['text-summary'],      
-      dir: '/tmp/hgi',
-
+      reports: ['text-summary'],
     },
   });
 
-  var exitFn, unhookFn;
-  istanbul.cover.getCoverFunctions(config, function(err, data) {
+  let exitFn;
+  let unhookFn;
+
+  istanbul.cover.getCoverFunctions(istanbulConfig, function(err, data) {
     if (err) {
       console.error(err);
     }
