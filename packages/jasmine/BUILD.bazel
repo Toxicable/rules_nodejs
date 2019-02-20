@@ -18,6 +18,7 @@ package(default_visibility = ["//visibility:public"])
 
 exports_files([
     "src/jasmine_runner.js",
+    "src/jasmine_runner_host.js",
     # Exported to be consumed for generating skydoc.
     "src/jasmine_node_test.bzl",
 ])
