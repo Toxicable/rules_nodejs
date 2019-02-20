@@ -70,5 +70,6 @@ function main(args) {
 }
 
 if (require.main === module) {
+  console.log('covdir', process.env.NODE_V8_COVERAGE);
   process.exitCode = main(process.argv.slice(2));
 }

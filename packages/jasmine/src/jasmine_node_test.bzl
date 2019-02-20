@@ -52,7 +52,7 @@ def jasmine_node_test(
     )
 
     all_data = data + srcs + deps + [jasmine]
-    all_data += [Label("//:src/jasmine_runner.js")]
+    all_data += [Label("//:src/jasmine_runner.js"), Label("//:src/jasmine_runner_host.js")]
     all_data += [":%s_devmode_srcs.MF" % name]
     all_data += [Label("@bazel_tools//tools/bash/runfiles")]
     entry_point = "npm_bazel_jasmine/src/jasmine_runner.js"
