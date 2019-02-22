@@ -22,5 +22,8 @@ jasmine_node_test(
 
 jasmine_node_test(
     name = "coverage_test",
-    srcs = ["coverage_source.js", "coverage.spec.js"],
+    srcs = [
+        "coverage.spec.js",
+        "coverage_source.js",
+    ],
 )
