@@ -2,7 +2,6 @@ var crypto = require('crypto');
 const { join } = require('path');
 const fs = require('fs');
 const cild_process = require('child_process');
-const foreground = require('foreground-child');
 const Report = require('c8/lib/report')
 
 function main(args) {
@@ -15,7 +14,9 @@ function main(args) {
   //   outputReport(argv)
   // })  
   
-  const runner = cild_process.fork(require.resolve('./jasmine_runner.js'), [manifestFile]
+  const forkScript = process.env["BAZEL_TARGET"] ? "../dot_spec_test.runner_loader" : "./jasmine_runner";
+  
+  const runner = cild_process.fork(require.resolve(forkScript), [manifestFile]
   , { env: { ...process.env, NODE_V8_COVERAGE: covDir, }});
   runner.on('close', (code) => {
     const covDirFiles = fs.readdirSync(covDir);

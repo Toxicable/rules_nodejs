@@ -19,7 +19,7 @@ than launching a test in Karma, for example.
 """
 
 load("@build_bazel_rules_nodejs//internal/common:devmode_js_sources.bzl", "devmode_js_sources")
-load("@build_bazel_rules_nodejs//internal/node:node.bzl", "nodejs_test")
+load("@build_bazel_rules_nodejs//internal/node:node.bzl", "nodejs_test", "nodejs_binary")
 
 def jasmine_node_test(
         name,
@@ -51,12 +51,27 @@ def jasmine_node_test(
         tags = tags,
     )
 
-    all_data = data + srcs + deps + [jasmine]
-    all_data += ["@npm//c8", "@npm//foreground-child"]
-    all_data += [Label("//:src/jasmine_runner.js"), Label("//:src/jasmine_runner_host.js")]
+    runner_name = name + "." + "runner"
+
+    nodejs_binary(
+        name = runner_name,
+        data = [jasmine],
+        entry_point = "npm_bazel_jasmine/src/jasmine_runner.js",
+    )
+    print(runner_name)
+
+    all_data = data + srcs + deps
+    all_data += ["@npm//c8"]
+    all_data += [
+        # ":jasmine_node_test_bin_loader.js", 
+        ":" + runner_name, 
+        Label("//:src/jasmine_runner.js"),
+        Label("//:src/jasmine_runner_host.js")
+    ]
     all_data += [":%s_devmode_srcs.MF" % name]
     all_data += [Label("@bazel_tools//tools/bash/runfiles")]
     entry_point = "npm_bazel_jasmine/src/jasmine_runner_host.js"
+
 
     nodejs_test(
         name = name,
