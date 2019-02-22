@@ -19,3 +19,8 @@ jasmine_node_test(
     name = "dot_test_test",
     srcs = ["foo.test.js"],
 )
+
+jasmine_node_test(
+    name = "coverage_test",
+    srcs = ["coverage_source.js", "coverage.spec.js"],
+)

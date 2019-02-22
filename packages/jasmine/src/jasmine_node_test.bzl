@@ -58,7 +58,6 @@ def jasmine_node_test(
         data = [jasmine],
         entry_point = "npm_bazel_jasmine/src/jasmine_runner.js",
     )
-    print(runner_name)
 
     all_data = data + srcs + deps
     all_data += ["@npm//c8"]

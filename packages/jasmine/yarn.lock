@@ -47,7 +47,7 @@ brace-expansion@^1.1.7:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
 
-c8@^3.4.0:
+c8@~3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/c8/-/c8-3.4.0.tgz#751b2639bc8b817c41b9fe9c1f0722a1e1fda61b"
   integrity sha512-LJcCHZlcWzTeRdUciC3fTq2AoIjBAZ18oHMG3StFVpKHxN+6IDUesrG6uiK3DlRm2PaDBfEOyp2N69VqQte1XA==
