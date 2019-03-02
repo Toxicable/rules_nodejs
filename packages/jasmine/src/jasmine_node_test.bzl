@@ -60,16 +60,16 @@ def jasmine_node_test(
     )
 
     all_data = data + srcs + deps
+    # code coverage reporting dependancy
     all_data += ["@npm//c8"]
     all_data += [
         # ":jasmine_node_test_bin_loader.js",
         ":" + runner_name,
         Label("//:src/jasmine_runner.js"),
-        Label("//:src/jasmine_runner_host.js"),
     ]
     all_data += [":%s_devmode_srcs.MF" % name]
     all_data += [Label("@bazel_tools//tools/bash/runfiles")]
-    entry_point = "npm_bazel_jasmine/src/jasmine_runner_host.js"
+    entry_point = "npm_bazel_jasmine/src/jasmine_runner.js"
 
     nodejs_test(
         name = name,
@@ -78,6 +78,7 @@ def jasmine_node_test(
         templated_args = ["$(location :%s_devmode_srcs.MF)" % name],
         testonly = 1,
         expected_exit_code = expected_exit_code,
+        configuration_env_vars = ["NODE_V8_COVERAGE"],
         tags = tags,
         **kwargs
     )

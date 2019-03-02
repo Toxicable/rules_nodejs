@@ -1,7 +1,10 @@
 const fs = require('fs');
+const path = require('path');
 
 let jasmineCore = null
 let JasmineRunner = require('jasmine/lib/jasmine');
+const Report = require('c8/lib/report');
+
 if (global.jasmine) {
   // global.jasmine has been initialized which means a bootstrap script
   // has already required `jasmine-core` and called jasmineCore.boot()
@@ -27,6 +30,9 @@ const BAZEL_EXIT_NO_TESTS_FOUND = 4;
 // the maximum (See: https://nodejs.org/api/errors.html#errors_error_stacktracelimit)
 Error.stackTraceLimit = Infinity;
 
+const IS_TEST_FILE = /[^a-zA-Z0-9](spec|test)\.js$/i;
+const IS_MODULE_MODULE = /\/node_modules\//
+
 function main(args) {
   if (!args.length) {
     throw new Error('Spec file manifest expected argument missing');
@@ -36,17 +42,31 @@ function main(args) {
   process.argv.splice(2, 1)[0];
 
   const jrunner = new JasmineRunner({jasmineCore: jasmineCore});
-  fs.readFileSync(manifest, UTF8)
+  const allFiles = fs.readFileSync(manifest, UTF8)
       .split('\n')
       .filter(l => l.length > 0)
+      // Filter out files from node_modules that match test.js or spec.js
+      .filter(f => !IS_MODULE_MODULE.test(f))
+
+  // the relative directory the coverage reporter uses to find the files
+  const cwd = process.cwd()
+
+  const sourceFiles = allFiles
+    // Filter out all .spec and .test files so we only report
+    // coverage against the source files
+    .filter(f => !IS_TEST_FILE.test(f))
+    .map(f => require.resolve(f))
+    // the reporting lib resolves the relative path instead of using the absolute one
+    // so match it here
+    .map(f => path.relative(cwd, f))
+
+  allFiles
       // Filter here so that only files ending in `spec.js` and `test.js`
       // are added to jasmine as spec files. This is important as other
       // deps such as "@npm//typescript" if executed may cause the test to
       // fail or have unexpected side-effects. "@npm//typescript" would
       // try to execute tsc, print its help, and process.exit(1)
-      .filter(f => /[^a-zA-Z0-9](spec|test)\.js$/i.test(f))
-      // Filter out files from node_modules that match test.js or spec.js
-      .filter(f => !/\/node_modules\//.test(f))
+      .filter(f => IS_TEST_FILE.test(f))
       .forEach(f => jrunner.addSpecFile(f));
 
   var noSpecsFound = true;
@@ -62,6 +82,25 @@ function main(args) {
   jrunner.onComplete((passed) => {
     let exitCode = passed ? 0 : BAZEL_EXIT_TESTS_FAILED;
     if (noSpecsFound) exitCode = BAZEL_EXIT_NO_TESTS_FOUND;
+    
+    console.log(process.env.NODE_V8_COVERAGE)
+    console.log('covfiles', fs.readdirSync(process.env.NODE_V8_COVERAGE));
+    if (process.env.NODE_V8_COVERAGE) {
+      const report = Report({
+        include: sourceFiles,
+        exclude: [],
+        // only output a text-summary
+        // we can output other formats when bazel coverage can pick them up
+        reporter: ['text-summary'],
+        tempDirectory: process.env.NODE_V8_COVERAGE,
+        watermarks: undefined,
+        resolve: cwd,
+        omitRelative: undefined,
+        wrapperLength: undefined
+      });
+      report.run();
+    }
+
     process.exit(exitCode);
   });
 
@@ -70,5 +109,6 @@ function main(args) {
 }
 
 if (require.main === module) {
-  process.exitCode = main(process.argv.slice(2));
+    console.log(process.env.NODE_V8_COVERAGE)
+    process.exitCode = main(process.argv.slice(2));
 }

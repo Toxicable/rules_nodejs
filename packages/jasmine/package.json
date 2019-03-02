@@ -4,7 +4,7 @@
     "license": "Apache 2.0",
     "version": "0.0.0-PLACEHOLDER",
     "dependencies": {
-        "c8": "~3.4.0",
+        "c8": "3.4.0",
         "jasmine": "~3.3.1"
     },
     "bazelWorkspaces": {
