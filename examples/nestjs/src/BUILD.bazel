@@ -22,6 +22,7 @@ ts_library(
     name = "app",
     srcs = glob(["*.ts"], exclude = ["*.spec.ts"]),
     deps = [
+        "@npm//@nestjs/platform-express",
         "@npm//@nestjs/common",
         "@npm//@nestjs/core",
         "@npm//@types/node",
@@ -51,7 +52,6 @@ nodejs_binary(
         ":app",
         "@npm//@nestjs/common",
         "@npm//@nestjs/core",
-        "@npm//@nestjs/platform-express",
         "@npm//minimist",
     ],
     entry_point = ":main.ts",
