@@ -64,7 +64,7 @@
         "rollup-plugin-json": "4.0.0",
         "rollup-plugin-node-resolve": "~4.2.0",
         "rollup-plugin-sourcemaps": "^0.4.2",
-        "rxjs": "^6.5.2",
+        "rxjs": "^6.5.4",
         "semver": "5.6.0",
         "shelljs": "0.8.3",
         "sinon": "^7.3.2",
@@ -120,5 +120,11 @@
             "pre-push": "yarn bazel:format-check && yarn bazel:lint",
             "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
         }
+    },
+    "dependencies": {
+        "@angular/common": "^9.1.0",
+        "@angular/compiler": "^9.1.0",
+        "@angular/compiler-cli": "^9.1.0",
+        "@angular/core": "^9.1.0"
     }
 }
