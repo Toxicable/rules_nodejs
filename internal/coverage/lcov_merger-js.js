@@ -1,4 +1,4 @@
-/* THIS FILE GENERATED FROM .ts; see BUILD.bazel */ /* clang-format off */"use strict";
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const rl = require("readline");
 function _getArg(argv, key) {
     return argv.find(a => a.startsWith(key)).split('=')[1];
 }
@@ -26,6 +27,7 @@ function main() {
             throw new Error();
         }
         const instrumentedSourceFiles = fs.readFileSync(sourceFileManifest).toString('utf8').split('\n');
+        console.log(instrumentedSourceFiles)
         const c8OutputDir = path.join(tmpdir, crypto.randomBytes(4).toString('hex'));
         fs.mkdirSync(c8OutputDir);
         const includes = instrumentedSourceFiles
@@ -52,6 +54,7 @@ function main() {
             }
             throw e;
         }
+        console.log('|||||||||||||||||||||||||||||||| all: true |||||||||||||||||||||||')
         yield new c8
             .Report({
             include: includes,
@@ -59,10 +62,22 @@ function main() {
             reportsDirectory: c8OutputDir,
             tempDirectory: coverageDir,
             resolve: '',
-            reporter: ['lcovonly']
+            reporter: ['lcovonly'],
+            all: true,
         })
             .run();
-        fs.copyFileSync(path.join(c8OutputDir, 'lcov.info'), outputFile);
+        const inputPaht = path.join(c8OutputDir, 'lcov.info');
+        const output = fs.createWriteStream(outputFile);
+        const read = rl.createInterface({
+            input: fs.createReadStream(inputPaht),
+        });
+        read.on('line', line => {
+            const fixed = line.replace('SF:../../../', 'SF:');
+            output.write(fixed + '\n');
+        });
+        read.on('close', () => {
+            output.close();
+        });
     });
 }
 if (require.main === module) {
